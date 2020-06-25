@@ -18,7 +18,6 @@ public class Cuenta {
 	@ManyToOne
 	@JoinColumn(name = "billetera_id",referencedColumnName = "billetera_id")
     private Billetera billetera;
-
 	@OneToMany(mappedBy = "cuenta",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Transaccion> transacciones = new ArrayList<>();
 
