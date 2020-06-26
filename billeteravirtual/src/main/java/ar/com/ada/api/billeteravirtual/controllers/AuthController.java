@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import ar.com.ada.api.billeteravirtual.entities.Usuario;
 import ar.com.ada.api.billeteravirtual.models.request.LoginRequest;
 import ar.com.ada.api.billeteravirtual.models.request.RegistrationRequest;
 import ar.com.ada.api.billeteravirtual.models.response.JwtResponse;
@@ -36,12 +37,11 @@ public class AuthController {
     @PostMapping("auth/register")
     public ResponseEntity<RegistrationResponse> postRegisterUser(@RequestBody RegistrationRequest req) {
         RegistrationResponse r = new RegistrationResponse();
-        // aca creamos la persona y el usuario a traves del service.
-        //Insertar codigo aqui
-        //usuarioService.crearUsuario(parametros de req);
+
+        Usuario usuario = usuarioService.crearUsuario(req.fullName, req.country, req.identificationType, req.identification, req.birthDate, req.email, req.password);
         r.isOk = true;
         r.message = "Te registraste con exitoooo!!!!!!!";
-        r.userId = 0; // <-- AQUI ponemos el numerito de id para darle a front!
+        r.userId = usuario.getUsuarioId(); // <-- AQUI ponemos el numerito de id para darle a front!
         return ResponseEntity.ok(r);
 
     }
