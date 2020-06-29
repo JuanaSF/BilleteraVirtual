@@ -1,13 +1,17 @@
 package ar.com.ada.api.billeteravirtual.services;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ar.com.ada.api.billeteravirtual.entities.Billetera;
+import ar.com.ada.api.billeteravirtual.entities.Cuenta;
 import ar.com.ada.api.billeteravirtual.entities.Persona;
 import ar.com.ada.api.billeteravirtual.entities.Usuario;
 import ar.com.ada.api.billeteravirtual.repos.UsuarioRepository;
+import ar.com.ada.api.billeteravirtual.security.Crypto;
 
 @Service
 public class UsuarioService {
@@ -44,11 +48,12 @@ public class UsuarioService {
         Usuario usuario = new Usuario();
         usuario.setUsername(email);
         usuario.setEmail(email);
-        usuario.setPassword(password);
+        usuario.setPassword(Crypto.encrypt(password, email));
 
         persona.setUsuario(usuario);
 
         personaService.grabar(persona);
+
 
         return usuario;
     }
