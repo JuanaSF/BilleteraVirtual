@@ -22,6 +22,9 @@ public class UsuarioService {
     @Autowired
     PersonaService personaService;
 
+    @Autowired
+    BilleteraService billeteraService;
+
     public Usuario buscarPorUsername(String username) {
         return null;
     }
@@ -33,11 +36,6 @@ public class UsuarioService {
     public Usuario crearUsuario(String nombre, int pais, int tipoDocumento, String documento, Date fechaNacimiento,
             String email, String password) {
 
-        /*
-         * 1.1-->Crear una Persona(setearle un usuario) 1.2-->crear un usuario
-         * 1.3-->Crear una billetera(setearle una persona) 1.4-->Crear una cuenta en
-         * pesos y otra en dolares
-         */
         Persona persona = new Persona();
         persona.setNombre(nombre);
         persona.setPaisId(pais);
@@ -52,8 +50,27 @@ public class UsuarioService {
 
         persona.setUsuario(usuario);
 
+        Billetera billetera = new Billetera(); // Se crea la billetera
+
+        BigDecimal saldoInicial = new BigDecimal(0);
+
+        Cuenta cuentaPesos = new Cuenta(); // Se crea cuenta en pesos
+        cuentaPesos.setSaldo(saldoInicial);
+        cuentaPesos.setMoneda("ARS");
+
+        Cuenta cuentaDolares = new Cuenta(); // Se crea cuenta en dolares
+        cuentaDolares.setSaldo(saldoInicial);
+        cuentaDolares.setMoneda("USD");
+
+        // Les seteo las cuentas a billetera
+        billetera.agregarCuenta(cuentaPesos);
+        billetera.agregarCuenta(cuentaDolares);
+
+        persona.setBilletera(billetera);// Se le da la billetera a la persona
+
         personaService.grabar(persona);
 
+        billeteraService.grabar(billetera);
 
         return usuario;
     }
