@@ -48,4 +48,16 @@ public class Billetera {
 		cuenta.setBilletera(this);
 	}
 
+	public Cuenta getCuenta(String moneda){
+
+        for(Cuenta cuenta: this.cuentas){
+
+            if(cuenta.getMoneda().equals(moneda)){
+
+                return cuenta;
+            }
+        }
+        return null;
+    }
+
 }
