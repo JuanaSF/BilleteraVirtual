@@ -4,12 +4,10 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-import ar.com.ada.api.billeteravirtual.entities.Billetera;
-import ar.com.ada.api.billeteravirtual.entities.Cuenta;
-import ar.com.ada.api.billeteravirtual.entities.Persona;
-import ar.com.ada.api.billeteravirtual.entities.Usuario;
+import ar.com.ada.api.billeteravirtual.entities.*;         
 import ar.com.ada.api.billeteravirtual.repos.UsuarioRepository;
 import ar.com.ada.api.billeteravirtual.security.Crypto;
 
@@ -26,12 +24,21 @@ public class UsuarioService {
     BilleteraService billeteraService;
 
     public Usuario buscarPorUsername(String username) {
-        return null;
+        return repo.findByUsername(username);
     }
 
     public void login(String username, String password) {
-    }
+        /**
+         * Metodo IniciarSesion recibe usuario y contraseña validar usuario y contraseña
+         */
 
+        Usuario u = buscarPorUsername(username);
+
+        if (u == null || !u.getPassword().equals(Crypto.encrypt(password, u.getUsername()))) {
+
+            throw new BadCredentialsException("Usuario o contraseña invalida");
+        }
+    }
 
     public Usuario crearUsuario(String nombre, int pais, int tipoDocumento, String documento, Date fechaNacimiento,
             String email, String password) {
@@ -72,8 +79,10 @@ public class UsuarioService {
 
         billeteraService.grabar(billetera);
 
-        billeteraService.cargarSaldo(new BigDecimal(500), "ARS", billetera.getBilleteraId(), "regalo", "Bienvenida por creacion de usuario");
+        billeteraService.cargarSaldo(new BigDecimal(500), "ARS", billetera.getBilleteraId(), "regalo",
+                "Bienvenida por creacion de usuario");
 
         return usuario;
     }
+
 }
