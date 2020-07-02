@@ -57,7 +57,7 @@ public class Usuario {
 		return fechaLogin;
 	}
 
-	public void setFechaLoing(Date fechaLogin) {
+	public void setFechaLogin(Date fechaLogin) {
 		this.fechaLogin = fechaLogin;
 	}
 
