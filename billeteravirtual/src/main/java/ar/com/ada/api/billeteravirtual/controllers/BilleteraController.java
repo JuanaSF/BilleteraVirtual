@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ar.com.ada.api.billeteravirtual.entities.*;
+import ar.com.ada.api.billeteravirtual.entities.Transaccion.ResultadoTransaccionEnum;
 import ar.com.ada.api.billeteravirtual.models.request.*;
 import ar.com.ada.api.billeteravirtual.models.response.*;
 import ar.com.ada.api.billeteravirtual.services.BilleteraService;
@@ -58,7 +59,8 @@ public class BilleteraController {
     }
 
     @PostMapping("/billeteras/{id}/recargas")
-    public ResponseEntity<TransaccionResponse> cargarSaldo(@PathVariable Integer id, @RequestBody CargaRequest recarga) {
+    public ResponseEntity<TransaccionResponse> cargarSaldo(@PathVariable Integer id,
+            @RequestBody CargaRequest recarga) {
 
         TransaccionResponse response = new TransaccionResponse();
 
@@ -77,15 +79,23 @@ public class BilleteraController {
      */
 
     @PostMapping("/billeteras/{id}/envios")
-    public ResponseEntity<TransaccionResponse> enviarSaldo(@PathVariable Integer id, @RequestBody EnvioSaldoRequest envio) {
+    public ResponseEntity<TransaccionResponse> enviarSaldo(@PathVariable Integer id,
+            @RequestBody EnvioSaldoRequest envio) {
 
         TransaccionResponse response = new TransaccionResponse();
+        ResultadoTransaccionEnum resultado = billeteraService.enviarSaldo(envio.importe, envio.moneda, id, envio.email,
+                envio.motivo, envio.detalle);
 
-        billeteraService.enviarSaldo(envio.importe, envio.moneda, id, envio.email, envio.motivo, envio.detalle);
+        if (resultado == ResultadoTransaccionEnum.INICIADA) {
 
-        response.isOk = true;
-        response.message = "Se envio el saldo exitosamente";
+            response.isOk = true;
+            response.message = "Se envio el saldo exitosamente";
+            return ResponseEntity.ok(response);
+        }
+        response.isOk = false;
+        response.message = "Hubo un error al realizar la operacion " + resultado;
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.badRequest().body(response);
+
     }
 }

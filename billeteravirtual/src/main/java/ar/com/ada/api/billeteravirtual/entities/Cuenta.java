@@ -104,7 +104,7 @@ public class Cuenta {
 		transaccion.setTipoOperacion(tipoOp);
 		transaccion.setEstadoId(2);// -1 Rechazada 0 Pendiente 2 Aprobada
 
-		if (transaccion.getTipoOperacion() == tipoOp.ENTRANTE) {
+		if (transaccion.getTipoOperacion() == TipoTransaccionEnum.ENTRANTE) {
 
 			transaccion.setaUsuarioId(billetera.getPersona().getUsuario().getUsuarioId());
 			transaccion.setaCuentaId(this.getCuentaId());
