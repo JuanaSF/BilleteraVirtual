@@ -5,6 +5,11 @@ import java.util.*;
 
 import javax.persistence.*;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import ar.com.ada.api.billeteravirtual.entities.Transaccion.TipoTransaccionEnum;
+
 @Entity
 @Table(name = "cuenta")
 public class Cuenta {
@@ -19,6 +24,7 @@ public class Cuenta {
 	@JoinColumn(name = "billetera_id", referencedColumnName = "billetera_id")
 	private Billetera billetera;
 	@OneToMany(mappedBy = "cuenta", cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.FALSE)
 	private List<Transaccion> transacciones = new ArrayList<>();
 
 	public Integer getCuentaId() {
@@ -69,20 +75,24 @@ public class Cuenta {
 		transaccion.setCuenta(this);
 
 		BigDecimal saldoActual = this.getSaldo();
-		if (transaccion.getTipoOperacion().equals(1)) {
+		BigDecimal importe = transaccion.getImporte();
+		BigDecimal saldoNuevo; 
 
-			BigDecimal saldoNuevo = saldoActual.add(saldo);
-			this.setSaldo(saldoNuevo);
+		if (transaccion.getTipoOperacion() == TipoTransaccionEnum.ENTRANTE) {
+
+			saldoNuevo = saldoActual.add(importe);
+
 		} else {
 
-			BigDecimal saldoNuevo = saldoActual.subtract(saldo);
-			this.setSaldo(saldoNuevo);
+			saldoNuevo = saldoActual.subtract(importe);
 		}
+
+		this.setSaldo(saldoNuevo);
 
 	}
 
 	public Transaccion generarTransaccion(String conceptoOperacion, String detalle, BigDecimal importe,
-			Integer tipoOp) {
+			TipoTransaccionEnum tipoOp) {
 
 		Transaccion transaccion = new Transaccion();
 
@@ -91,10 +101,10 @@ public class Cuenta {
 		transaccion.setConceptoOperacion(conceptoOperacion);
 		transaccion.setDetalle(detalle);
 		transaccion.setImporte(importe);
-		transaccion.setTipoOperacion(tipoOp);// 1 Entrada, 0 Salida
+		transaccion.setTipoOperacion(tipoOp);
 		transaccion.setEstadoId(2);// -1 Rechazada 0 Pendiente 2 Aprobada
 
-		if (transaccion.getTipoOperacion() == 1) { // Es de entrada
+		if (transaccion.getTipoOperacion() == tipoOp.ENTRANTE) {
 
 			transaccion.setaUsuarioId(billetera.getPersona().getUsuario().getUsuarioId());
 			transaccion.setaCuentaId(this.getCuentaId());
