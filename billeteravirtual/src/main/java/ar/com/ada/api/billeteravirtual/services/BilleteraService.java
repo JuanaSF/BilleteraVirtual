@@ -10,6 +10,7 @@ import ar.com.ada.api.billeteravirtual.entities.*;
 import ar.com.ada.api.billeteravirtual.entities.Transaccion.ResultadoTransaccionEnum;
 import ar.com.ada.api.billeteravirtual.entities.Transaccion.TipoTransaccionEnum;
 import ar.com.ada.api.billeteravirtual.repos.BilleteraRepository;
+import ar.com.ada.api.billeteravirtual.sistema.comm.EmailService;
 
 @Service
 public class BilleteraService {
@@ -19,6 +20,9 @@ public class BilleteraService {
 
     @Autowired
     UsuarioService usuarioService;
+
+    @Autowired
+    EmailService emailService;
 
     /*
      * 2. Metodo: enviar plata 2.1-- recibir un importe, la moneda en la que va a
@@ -42,6 +46,8 @@ public class BilleteraService {
         Billetera billetera = this.buscarPorId(billeteraId);
 
         cargarSaldo(saldo, moneda, billetera, conceptoOperacion, detalle);
+
+        emailService.SendEmail(billetera.getPersona().getUsuario().getEmail(), "Recarga Exitosa", "Hola, Confirmamos tu recarga de " + saldo + " " + moneda);
     }
 
     public void cargarSaldo(BigDecimal saldo, String moneda, Billetera billetera, String conceptoOperacion,
