@@ -2,12 +2,13 @@ package ar.com.ada.api.billeteravirtual.services;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-import ar.com.ada.api.billeteravirtual.entities.*;         
+import ar.com.ada.api.billeteravirtual.entities.*;
 import ar.com.ada.api.billeteravirtual.repos.UsuarioRepository;
 import ar.com.ada.api.billeteravirtual.security.Crypto;
 import ar.com.ada.api.billeteravirtual.sistema.comm.EmailService;
@@ -83,16 +84,28 @@ public class UsuarioService {
 
         billeteraService.grabar(billetera);
 
-        billeteraService.cargarSaldo(new BigDecimal(500), "ARS", billetera, "regalo", "Bienvenida por creacion de usuario");
+        billeteraService.cargarSaldo(new BigDecimal(500), "ARS", billetera, "regalo",
+                "Bienvenida por creacion de usuario");
 
-        emailService.SendEmail(usuario.getEmail(), "Bienvenido a Billetera Virtual", "Enhorabuena! Te regalamos 500 ARS como bienvenida a Billetera Virtual! :D ");
+        emailService.SendEmail(usuario.getEmail(), "Bienvenido a Billetera Virtual",
+                "Enhorabuena! Te regalamos 500 ARS como bienvenida a Billetera Virtual! :D ");
 
         return usuario;
     }
 
-    public Usuario buscarPorEmail(String email){
+    public Usuario buscarPorEmail(String email) {
 
         return repo.findByEmail(email);
+    }
+
+    public Usuario buscarPor(Integer id) {
+        Optional<Usuario> usuarioOp = repo.findById(id);
+
+        if(usuarioOp.isPresent()){
+            return usuarioOp.get();
+        }
+
+        return null;
     }
 
 }
