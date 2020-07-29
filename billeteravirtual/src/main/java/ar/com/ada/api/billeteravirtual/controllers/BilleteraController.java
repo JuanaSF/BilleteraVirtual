@@ -1,10 +1,12 @@
 package ar.com.ada.api.billeteravirtual.controllers;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ar.com.ada.api.billeteravirtual.entities.*;
 import ar.com.ada.api.billeteravirtual.entities.Transaccion.ResultadoTransaccionEnum;
@@ -30,8 +32,21 @@ public class BilleteraController {
      * "importe": "email": "motivo": "detalleDelMotivo": }
      */
 
+    // Metodo de verificacion Usando el "Principal": que es una abstraccion que permite acceder al
+    // usuario que esta logueado. 
+    //Checkeo que el usuario que consulta sea el dueño de esa billetera
     @GetMapping("/billeteras/{id}/saldos/{moneda}")
-    public ResponseEntity<?> consultarSaldo(@PathVariable Integer id, @PathVariable String moneda) {
+    public ResponseEntity<?> consultarSaldo(Principal principal, @PathVariable Integer id, @PathVariable String moneda) {
+
+        // Obtengo primero el usuario en base al Principal
+        Usuario usuarioLogueado = usuarioService.buscarPorUsername(principal.getName());
+        // Checkqueo si la billetera le corresponde, si no, 403 Forbiden
+        if (!usuarioLogueado.getPersona().getBilletera().getBilleteraId().equals(id)) {
+            //Se puede generar una alerta de cyberseguridad
+
+            return ResponseEntity.status(403).build();// Forbideen
+            //Tambien se podria responder con un resultado mentiroso: ej 404
+        }
 
         SaldoResponse saldo = new SaldoResponse();
 
@@ -41,7 +56,13 @@ public class BilleteraController {
         return ResponseEntity.ok(saldo);
     }
 
+    // Metodo Verificacion Billetera 2: haciendo lo mismo que antes, pero usando
+    // Spring Expression LANGUAGE(magic)
+    // Aca el principal es el User, este principal no es el mismo principal del
+    // metodo anterior
+    // pero apunta a uno parecido(el de arriba es el principal authentication)
     @GetMapping("/billeteras/{id}/saldos")
+    @PreAuthorize("@usuarioService.buscarPorUsername(principal.getUsername()).getPersona().getBilletera().getBilleteraId().equals(#id)")
     public ResponseEntity<List<SaldoResponse>> consultarSaldo(@PathVariable Integer id) {
 
         Billetera billetera = new Billetera();
@@ -62,6 +83,7 @@ public class BilleteraController {
     }
 
     @PostMapping("/billeteras/{id}/recargas")
+    @PreAuthorize("@usuarioService.buscarPorUsername(principal.getUsername()).getPersona().getBilletera().getBilleteraId().equals(#id)")
     public ResponseEntity<TransaccionResponse> cargarSaldo(@PathVariable Integer id,
             @RequestBody CargaRequest recarga) {
 
@@ -82,6 +104,7 @@ public class BilleteraController {
      */
 
     @PostMapping("/billeteras/{id}/envios")
+    @PreAuthorize("@usuarioService.buscarPorUsername(principal.getUsername()).getPersona().getBilletera().getBilleteraId().equals(#id)")
     public ResponseEntity<TransaccionResponse> enviarSaldo(@PathVariable Integer id,
             @RequestBody EnvioSaldoRequest envio) {
 
@@ -103,6 +126,7 @@ public class BilleteraController {
     }
 
     @GetMapping("/billeteras/{id}/movimientos/{moneda}")
+    @PreAuthorize("@usuarioService.buscarPorUsername(principal.getUsername()).getPersona().getBilletera().getBilleteraId().equals(#id)")
     public ResponseEntity<List<MovimientosResponse>> consultarMovimientos(@PathVariable Integer id, @PathVariable String moneda){
 
         Billetera billetera = new Billetera();
@@ -128,6 +152,7 @@ public class BilleteraController {
     }
 
     @GetMapping("/billeteras/{id}/movimientos")
+    @PreAuthorize("@usuarioService.buscarPorUsername(principal.getUsername()).getPersona().getBilletera().getBilleteraId().equals(#id)")
     public ResponseEntity<List<MovimientosResponse>> consultarMovimientos(@PathVariable Integer id){
 
         Billetera billetera = new Billetera();
